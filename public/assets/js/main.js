@@ -57,23 +57,28 @@
     });
   }
 
-  // barra fixa no mobile: aparece depois do hero, some no convite final
-  var dock = $('#dock'), heroCta = $('#hero-cta'), finalCta = $('#final-cta');
+  // barra fixa no mobile: aparece depois do hero, some nos outros convites (feedbacks e final)
+  var dock = $('#dock'), heroCta = $('#hero-cta'), proofCta = $('#proof-cta'), finalCta = $('#final-cta');
   if (dock && 'IntersectionObserver' in window) {
-    var vis = { hero: true, fin: false };
-    var upd = function () { var on = !vis.hero && !vis.fin; dock.classList.toggle('show', on); document.body.classList.toggle('has-dock', on); };
+    var vis = { hero: true, mid: false, fin: false };
+    var upd = function () { var on = !vis.hero && !vis.mid && !vis.fin; dock.classList.toggle('show', on); document.body.classList.toggle('has-dock', on); };
     new IntersectionObserver(function (es) { vis.hero = es[0].isIntersecting; upd(); }).observe(heroCta);
+    if (proofCta) new IntersectionObserver(function (es) { vis.mid = es[0].isIntersecting; upd(); }).observe(proofCta);
     new IntersectionObserver(function (es) { vis.fin = es[0].isIntersecting; upd(); }).observe(finalCta);
   }
 
-  // ampliar prints
-  var lb = $('#lb'), lbImg = $('#lb-img');
-  document.querySelectorAll('.shot').forEach(function (b) {
-    b.addEventListener('click', function () {
-      lbImg.src = b.dataset.full; lbImg.alt = b.dataset.alt;
-      if (lb.showModal) { lb.showModal(); } else { lb.setAttribute('open', ''); }
-    });
+  // ampliar prints: pelos tiles da faixa curva (evento tiltedgrid:open) e pela
+  // lista de avaliações em texto, que também dá o texto alternativo de cada print
+  var lb = $('#lb'), lbImg = $('#lb-img'), altOf = {};
+  var openPrint = function (src) {
+    lbImg.src = src; lbImg.alt = altOf[src] || '';
+    if (lb.showModal) { lb.showModal(); } else { lb.setAttribute('open', ''); }
+  };
+  document.querySelectorAll('[data-full]').forEach(function (b) {
+    altOf[b.dataset.full] = b.dataset.alt;
+    b.addEventListener('click', function () { openPrint(b.dataset.full); });
   });
+  document.addEventListener('tiltedgrid:open', function (e) { openPrint(e.detail.src); });
   $('#lb-close').addEventListener('click', function () { lb.close(); });
   lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
 

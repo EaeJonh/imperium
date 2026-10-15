@@ -12,6 +12,8 @@
 // Uso: <div class="tg" data-tilted-grid data-images="/a.webp,/b.webp" hidden></div>
 // Opções em data-*: speed, tile-height, aspect, gap, axis, curve, fade e, abaixo
 // de NARROW px, curve-narrow e tile-height-narrow.
+// Clicar num tile dispara `tiltedgrid:open` (bubbles) com { src } da imagem que
+// ele mostra; quem usa a faixa decide o que fazer (aqui, o visualizador do main.js).
 (function () {
   'use strict';
 
@@ -167,7 +169,13 @@
       tile.style.top = 'calc(' + o.axis + '% - ' + u(0.5) + ')';
       tile.style.width = u(o.aspect);
       tile.style.height = u(1);
-      tile.style.animation = orbit + ' ' + duration + 's linear ' + (-t * o.speed) + 's infinite';
+      // Sem o atalho `animation`: ele gravaria animation-play-state inline e
+      // anularia as pausas do CSS (fora da tela, hover e reduced motion).
+      tile.style.animationName = orbit;
+      tile.style.animationDuration = duration + 's';
+      tile.style.animationTimingFunction = 'linear';
+      tile.style.animationDelay = (-t * o.speed) + 's';
+      tile.style.animationIterationCount = 'infinite';
 
       var imgs = [];
       for (var k = 0; k < SLICES; k++) {
@@ -196,6 +204,10 @@
         tile.appendChild(slice);
         imgs.push(img);
       }
+
+      tile.addEventListener('click', function () {
+        root.dispatchEvent(new CustomEvent('tiltedgrid:open', { bubbles: true, detail: { src: imgs[0].getAttribute('src') } }));
+      });
 
       // A cada volta (fora da tela) o tile passa para a próxima imagem da lista.
       tile.addEventListener('animationiteration', function (e) {
