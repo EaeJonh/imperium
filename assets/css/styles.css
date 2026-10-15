@@ -278,7 +278,13 @@ body::before {
   position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.4rem 1.5rem;
   padding: clamp(1.5rem, 2.6vw, 2.2rem) 0; text-decoration: none; color: var(--fg);
   border-bottom: 1px solid var(--line-2);
-  transition: padding .45s cubic-bezier(.2, .7, .2, 1), --dom-ink .45s ease, --dom-glow .45s ease;
+}
+/* Os itens também são .rv (aparecem ao rolar), e a transition do .rv vem depois
+   no CSS: com a mesma especificidade ela apagava esta, e a cor do hover trocava
+   de uma vez. Aqui as duas convivem, cada uma com o seu atraso. */
+.ledger .dom {
+  transition: --dom-ink .45s ease, --dom-glow .45s ease,
+    opacity .8s ease var(--d, 0s), transform .8s cubic-bezier(.2, .7, .2, 1) var(--d, 0s);
 }
 /* mancha de luz sob o ponteiro, mais o véu dourado que já existia */
 .dom::before {
@@ -298,15 +304,15 @@ body::before {
 }
 .dom:is(:hover, :focus-visible) { --dom-ink: var(--gold); --dom-glow: color-mix(in srgb, var(--gold-hi) 55%, #fff); }
 .dom:is(:hover, :focus-visible)::before, .is-lit .dom::after, .dom:focus-visible::after { opacity: 1; }
-@media (hover: hover) { .dom:hover { padding-left: 1.4rem; } }
+/* o texto desliza com transform (sem refazer o layout a cada quadro) */
+@media (hover: hover) { .dom:hover .dom-name, .dom:hover .dom-desc { transform: translateX(1.4rem); } }
 .dom-name {
   font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: clamp(2rem, 4vw, 3rem); line-height: 1; letter-spacing: 0.01em;
   background: radial-gradient(220px circle at calc(var(--nx, -999) * 1px) calc(var(--ny, -999) * 1px), var(--dom-glow), var(--dom-ink) 75%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  transition: letter-spacing .5s cubic-bezier(.2, .7, .2, 1);
+  transition: transform .6s cubic-bezier(.22, 1, .36, 1);
 }
-.dom:is(:hover, :focus-visible) .dom-name { letter-spacing: 0.035em; }
-.dom-desc { grid-column: 1; color: var(--fg-dim); max-width: 34rem; text-wrap: balance; transition: color .45s ease .05s; }
+.dom-desc { grid-column: 1; color: var(--fg-dim); max-width: 34rem; text-wrap: balance; transition: color .45s ease .05s, transform .6s cubic-bezier(.22, 1, .36, 1) .04s; }
 .dom:is(:hover, :focus-visible) .dom-desc { color: var(--fg); }
 .dom-go {
   grid-row: 1 / span 2; grid-column: 2;
@@ -441,8 +447,8 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
   .seal-text { animation: none; }
   .rv { opacity: 1; transform: none; transition: none; }
   .seal { transition: none; }
-  .dom, .dom::before, .dom::after, .dom-name, .dom-desc, .dom-go { transition: none; }
-  .dom:is(:hover, :focus-visible) .dom-go { transform: none; }
+  .ledger .dom, .dom::before, .dom::after, .dom-name, .dom-desc, .dom-go { transition: none; }
+  .dom:is(:hover, :focus-visible) .dom-go, .dom:hover .dom-name, .dom:hover .dom-desc { transform: none; }
   .btn, .btn::before, .btn::after, .btn-label::before { animation: none; }
   .btn { transition: none; }
   .btn:is(:hover, :focus-visible) .btn-label::before { opacity: 0; }
