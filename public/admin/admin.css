@@ -1,17 +1,30 @@
 :root {
-  --bg: #08080a;
-  --bg-2: #0e0e11;
-  --graphite: #17171b;
-  --line: rgba(236, 230, 216, 0.10);
-  --line-2: rgba(236, 230, 216, 0.18);
-  --fg: #ece6d8;
-  --fg-dim: rgba(236, 230, 216, 0.72);
-  --fg-mute: rgba(236, 230, 216, 0.56);
-  --gold: #c9a96a;
-  --gold-hi: #ecd49b;
-  --gold-ink: #1a1407;
+  /* paleta Imperium: a mesma do :root da landing (public/assets/css/styles.css) */
+  --primary: #D4BC8C;
+  --secondary: #2E2C29;
+  --accent: #D4BC8C;
+  --background: #131311;
+  --card: #1D1D1B;
+  --muted: #252523;
+  --fg: #ece6d8; /* texto */
+
+  /* papéis usados no painel, derivados da paleta como na landing */
+  --bg: var(--background);
+  --bg-2: var(--card);
+  --graphite: var(--muted);
+  --line: var(--secondary);
+  --line-2: color-mix(in srgb, var(--secondary) 86%, var(--fg));
+  --fg-dim: color-mix(in srgb, var(--fg) 74%, transparent);
+  --fg-mute: color-mix(in srgb, var(--fg) 60%, transparent);
+  --gold: var(--primary);
+  --gold-hi: color-mix(in srgb, var(--accent) 70%, #fff);
+  --gold-ink: var(--background);
+  --gold-wash: color-mix(in srgb, var(--primary) 8%, transparent);
+
+  /* status: fora da paleta da marca, contraste >= 5.3:1 sobre --bg, --card e --muted */
   --ok: #8fd19e;
   --bad: #f08a7e;
+
   --f-display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
   --f-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: dark;
@@ -85,7 +98,7 @@ code { font: 700 0.9rem/1 ui-monospace, Consolas, monospace; color: var(--gold-h
 .tag.on { color: var(--ok); }
 .tag.off { color: var(--fg-mute); }
 
-.notice { padding: 0.8rem 1rem; border: 1px solid var(--gold); border-radius: 4px; background: rgba(201, 169, 106, 0.08); margin: 0 0 1.5rem; }
+.notice { padding: 0.8rem 1rem; border: 1px solid var(--gold); border-radius: 4px; background: var(--gold-wash); margin: 0 0 1.5rem; }
 .notice.bad, .error { color: var(--bad); border-color: var(--bad); }
 .error { margin: 0; font-size: 0.88rem; }
 .hint { margin-top: 0.8rem; font-size: 0.8rem; color: var(--fg-mute); }
