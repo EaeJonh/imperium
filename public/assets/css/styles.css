@@ -330,17 +330,7 @@ body::before {
 .tg { position: relative; width: 100vw; margin: clamp(2rem, 4vw, 3rem) 0 0 calc(50% - 50vw); height: clamp(240px, 34vw, 440px); container-type: size; overflow: hidden; }
 .tg-band { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s ease; }
 .tg-band.is-ready { opacity: 1; }
-.tg-tile { position: absolute; transform-style: preserve-3d; pointer-events: auto; cursor: zoom-in; }
-/* parar a faixa sob o ponteiro para dar tempo de clicar (só com mouse: no toque o :hover gruda) */
-@media (hover: hover) {
-  .tg-band:has(.tg-tile:hover) .tg-tile { animation-play-state: paused; }
-  .tg-tile:hover .tg-slice img { filter: brightness(1.12); }
-}
-.tg-paused .tg-tile { animation-play-state: paused; }
-.tg-slice { position: absolute; top: 0; overflow: hidden; background: var(--graphite); }
-.tg-first { border-radius: 4px 0 0 4px; }
-.tg-last { border-radius: 0 4px 4px 0; }
-.tg-slice img { position: absolute; top: 0; max-width: none; object-fit: cover; transition: filter .3s ease; }
+.tg-band canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: auto; }
 /* avaliações em texto: escondidas como .sr-only; visíveis com foco do teclado ou sem a faixa */
 .proof-list { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .proof-list:focus-within, .tg[hidden] + .proof-list {
