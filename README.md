@@ -64,8 +64,10 @@ Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "inv
    | Variável | Uso |
    |---|---|
    | `SUPABASE_URL` | URL do projeto |
-   | `SUPABASE_PUBLISHABLE_KEY` | chave publicável; o painel recebe pelo `/api/public-config` e a RLS protege os dados |
-   | `SUPABASE_SECRET_KEY` | chave secreta; usada só pelo `/api/ref`, nunca exposta ao navegador |
+   | `SUPABASE_ANON_KEY` | chave publicável (`sb_publishable_...`); o painel recebe pelo `/api/public-config` e a RLS protege os dados |
+   | `SUPABASE_SERVICE_ROLE_KEY` | chave secreta (`sb_secret_...`); usada só pelo `/api/ref`, nunca exposta ao navegador |
+
+   Os nomes são os antigos do Supabase, mas os valores devem ser as chaves atuais. Chaves JWT legadas também funcionam.
    | `ALLOWED_ORIGINS` | origens aceitas pelo `/api/ref`, separadas por vírgula |
 
 3. Se usar um domínio próprio no Supabase (fora de `*.supabase.co`), inclua-o no `connect-src` do `Content-Security-Policy` do `/admin` no `vercel.json`.

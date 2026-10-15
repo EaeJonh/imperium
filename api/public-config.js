@@ -9,7 +9,7 @@ export default function handler(req, res) {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const supabasePublishableKey = process.env.SUPABASE_ANON_KEY;
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   if (!supabaseUrl || !supabasePublishableKey) {
