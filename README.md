@@ -53,7 +53,11 @@ Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "inv
    insert into public.admin_users (user_id)
    select id from auth.users where email = 'SEU-EMAIL';
    ```
-6. Em **Authentication → URL Configuration**, use `https://imperiumblox.shop` como Site URL.
+6. Em **Authentication → URL Configuration** (sem isso, os emails de convite e de recuperação de senha apontam para `localhost`):
+   - **Site URL:** `https://imperiumblox.shop/admin`
+   - **Redirect URLs:** `https://imperiumblox.shop/admin`, `https://www.imperiumblox.shop/admin` e, para testar em Preview, o padrão do projeto na Vercel, por exemplo `https://imperium-*-jonh-s-projects1.vercel.app/admin`
+
+   O “Esqueci minha senha” do painel pede o link de volta para o mesmo `/admin` de onde foi aberto, então ele funciona em Preview se a URL estiver na lista. Emails enviados pelo Dashboard do Supabase usam a Site URL.
 7. Em **Project Settings → API Keys**, copie a chave publicável (`sb_publishable_...`) e crie/copie uma chave secreta (`sb_secret_...`).
 
 ### Vercel

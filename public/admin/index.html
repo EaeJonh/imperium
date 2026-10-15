@@ -31,6 +31,27 @@
       <label>Senha <input type="password" name="password" autocomplete="current-password" required></label>
       <button type="submit" class="primary">Entrar</button>
       <p class="error" id="login-error" role="alert" hidden></p>
+      <button type="button" class="link-btn" id="show-forgot">Esqueci minha senha</button>
+    </form>
+  </section>
+
+  <section id="forgot-view" class="card login" hidden>
+    <h1>Recuperar senha</h1>
+    <form id="forgot-form">
+      <label>Email <input type="email" name="email" autocomplete="username" required></label>
+      <button type="submit" class="primary">Enviar link</button>
+      <p class="hint" id="forgot-status" role="status" hidden></p>
+      <button type="button" class="link-btn" id="back-to-login">Voltar para o login</button>
+    </form>
+  </section>
+
+  <section id="password-view" class="card login" hidden>
+    <h1>Definir nova senha</h1>
+    <form id="password-form">
+      <label>Nova senha <input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Confirmar senha <input type="password" name="confirm" autocomplete="new-password" minlength="8" required></label>
+      <button type="submit" class="primary">Salvar senha</button>
+      <p class="error" id="password-error" role="alert" hidden></p>
     </form>
   </section>
 

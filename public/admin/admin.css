@@ -53,6 +53,8 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .ghost { color: var(--fg); background: none; border: 1px solid var(--line-2); }
 .ghost:hover { border-color: var(--gold); color: var(--gold-hi); }
 .small { padding: 0.4rem 0.6rem; font-size: 0.68rem; }
+.link-btn { justify-self: start; padding: 0.2rem 0; background: none; border: 0; color: var(--fg-dim); text-decoration: underline; text-transform: none; letter-spacing: 0; font-weight: 600; }
+.link-btn:hover { color: var(--gold-hi); }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; }
 .grid .wide { grid-column: 1 / -1; }

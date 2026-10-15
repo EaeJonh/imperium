@@ -10,6 +10,12 @@ const ui = {
   login: $('#login-view'),
   loginForm: $('#login-form'),
   loginError: $('#login-error'),
+  forgot: $('#forgot-view'),
+  forgotForm: $('#forgot-form'),
+  forgotStatus: $('#forgot-status'),
+  password: $('#password-view'),
+  passwordForm: $('#password-form'),
+  passwordError: $('#password-error'),
   app: $('#app-view'),
   userBox: $('#user-box'),
   userEmail: $('#user-email'),
@@ -86,22 +92,25 @@ async function enterApp(session) {
   }
   ui.userEmail.textContent = session.user.email || '';
   show(ui.userBox, true);
-  show(ui.login, false);
-  show(ui.app, true);
+  showView(ui.app);
   await loadAffiliates();
 }
 
+// mostra uma única tela entre login, recuperação, nova senha e painel
+function showView(view) {
+  for (const v of [ui.login, ui.forgot, ui.password, ui.app]) show(v, v === view);
+  if (view !== ui.app) show(ui.userBox, false);
+}
+
 function showLogin(message) {
-  show(ui.app, false);
-  show(ui.userBox, false);
-  show(ui.login, true);
+  showView(ui.login);
   ui.loginError.textContent = message || '';
   show(ui.loginError, Boolean(message));
 }
 
 ui.loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const button = ui.loginForm.querySelector('button');
+  const button = ui.loginForm.querySelector('button[type="submit"]');
   button.disabled = true;
   show(ui.loginError, false);
   const fd = new FormData(ui.loginForm);
@@ -113,6 +122,52 @@ ui.loginForm.addEventListener('submit', async (e) => {
   if (error) return showLogin('Email ou senha inválidos.');
   ui.loginForm.reset();
   await enterApp(data.session);
+});
+
+// ---------- recuperação de senha
+
+$('#show-forgot').addEventListener('click', () => {
+  ui.forgotForm.reset();
+  ui.forgotForm.elements.email.value = ui.loginForm.elements.email.value;
+  show(ui.forgotStatus, false);
+  showView(ui.forgot);
+});
+
+$('#back-to-login').addEventListener('click', () => showLogin());
+
+ui.forgotForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const button = ui.forgotForm.querySelector('button[type="submit"]');
+  button.disabled = true;
+  // o link do email volta para este mesmo /admin (precisa estar em Redirect URLs no Supabase)
+  const { error } = await supabase.auth.resetPasswordForEmail(ui.forgotForm.elements.email.value.trim(), {
+    redirectTo: `${location.origin}/admin`,
+  });
+  button.disabled = false;
+  ui.forgotStatus.textContent = error && error.status === 429
+    ? 'Muitas tentativas. Aguarde alguns minutos e tente de novo.'
+    : 'Se o email tiver acesso, você vai receber um link para definir uma nova senha.';
+  show(ui.forgotStatus, true);
+});
+
+ui.passwordForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = ui.passwordForm.elements;
+  const fail = (message) => { ui.passwordError.textContent = message; show(ui.passwordError, true); };
+  show(ui.passwordError, false);
+  if (f.password.value.length < 8) return fail('Use pelo menos 8 caracteres.');
+  if (f.password.value !== f.confirm.value) return fail('As senhas não conferem.');
+
+  const button = ui.passwordForm.querySelector('button[type="submit"]');
+  button.disabled = true;
+  const { data, error } = await supabase.auth.updateUser({ password: f.password.value });
+  button.disabled = false;
+  if (error) return fail(error.code === 'same_password' ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível salvar a senha. Peça um novo link e tente de novo.');
+
+  ui.passwordForm.reset();
+  notify('Senha atualizada.');
+  const { data: s } = await supabase.auth.getSession();
+  await enterApp(s.session || { user: data.user });
 });
 
 $('#logout').addEventListener('click', async () => {
@@ -245,17 +300,36 @@ async function start() {
     return;
   }
 
+  // Links de email (recuperação ou convite) chegam com #access_token=...&type=recovery|invite
+  // ou com #error=...; o supabase-js consome e limpa o hash, então ele é lido antes.
+  const params = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
+  const linkType = params.get('type');
+  const linkError = params.get('error_code') || params.get('error');
+
   supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
   });
 
   supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') showLogin();
+    if (event === 'PASSWORD_RECOVERY') showView(ui.password);
   });
 
   const { data } = await supabase.auth.getSession();
-  if (data.session) await enterApp(data.session);
-  else showLogin();
+  if (location.hash || linkError) history.replaceState(null, '', '/admin');
+
+  if (linkError) {
+    if (data.session) await supabase.auth.signOut({ scope: 'local' });
+    showLogin(linkError === 'otp_expired'
+      ? 'O link expirou ou já foi usado. Peça um novo em “Esqueci minha senha”.'
+      : 'Não foi possível validar o link. Peça um novo em “Esqueci minha senha”.');
+  } else if (data.session && (linkType === 'recovery' || linkType === 'invite')) {
+    showView(ui.password);
+  } else if (data.session) {
+    await enterApp(data.session);
+  } else {
+    showLogin();
+  }
 }
 
 start();
