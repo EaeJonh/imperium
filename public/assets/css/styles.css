@@ -9,6 +9,11 @@
   --muted: #252523;
   --fg: #ece6d8; /* texto */
   --discord: #5865F2; /* cor da marca do Discord, só no selo dos botões */
+  /* fundo vivo (velaris.js): do dourado mais claro ao preto. 18% e 10% são o máximo em que --fg-mute ainda fica >= 4.5:1 no ponto mais claro */
+  --velaris-1: color-mix(in srgb, var(--primary) 18%, var(--background));
+  --velaris-2: color-mix(in srgb, var(--primary) 10%, var(--background));
+  --velaris-3: color-mix(in srgb, var(--primary) 8%, #000);
+  --velaris-4: #000;
 
   /* papéis usados nos componentes */
   --bg: var(--background);
@@ -52,6 +57,9 @@ p { text-wrap: pretty; }
 html:has(dialog.lb[open]) { overflow: hidden; }
 ul, ol { padding: 0; list-style: none; }
 :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+
+/* fundo vivo: canvas WebGL criado pelo velaris.js, fixo atrás de tudo */
+.velaris { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; display: block; }
 
 /* granulado sutil sobre toda a página */
 body::before {
@@ -211,8 +219,7 @@ body::before {
   padding-block: clamp(7.5rem, 13vw, 10rem) clamp(5.5rem, 10vw, 8rem);
   background:
     radial-gradient(60% 55% at 78% 40%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
-    radial-gradient(50% 50% at 8% 0%, color-mix(in srgb, var(--muted) 90%, transparent), transparent 70%),
-    var(--bg);
+    radial-gradient(50% 50% at 8% 0%, color-mix(in srgb, var(--muted) 60%, transparent), transparent 70%);
 }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); align-items: center; gap: clamp(1.5rem, 4vw, 4rem); position: relative; z-index: 2; }
 .hero h1 { margin-top: 1.6rem; font-size: clamp(3rem, 6.2vw, 5.6rem); }
@@ -240,7 +247,7 @@ body::before {
   -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 30%, transparent 100%); }
 
  /* ---------- rede ---------- */
-.net { position: relative; background: var(--bg-2); border-bottom: 1px solid var(--line); }
+.net { position: relative; background: color-mix(in srgb, var(--bg-2) 72%, transparent); border-bottom: 1px solid var(--line); }
 .net-tape { border-block: 1px solid var(--gold-lo); background: linear-gradient(180deg, color-mix(in srgb, var(--fg) 9%, transparent), color-mix(in srgb, var(--fg) 3%, transparent)); }
 .net-tape-in { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-block: 0.8rem; }
 .net-tape span { font: 700 clamp(0.78rem, 1.6vw, 1.15rem)/1 var(--f-display); letter-spacing: 0.28em; text-transform: uppercase; color: color-mix(in srgb, var(--fg) calc(var(--a, 0.6) * 100%), transparent); }
@@ -284,7 +291,7 @@ body::before {
 .dom:hover .dom-go { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
 
 /* provas */
-.proof { background: var(--bg-2); border-block: 1px solid var(--line); overflow: hidden; }
+.proof { background: color-mix(in srgb, var(--bg-2) 72%, transparent); border-block: 1px solid var(--line); overflow: hidden; }
 .proof .sec-head { display: flex; justify-content: space-between; align-items: end; gap: 1.2rem 3rem; flex-wrap: wrap; }
 .proof .sec-head > div { min-width: 0; }
 .proof .sec-head > p { margin: 0; max-width: 24rem; padding-bottom: 0.5rem; color: var(--fg-dim); text-wrap: balance; }
@@ -339,7 +346,7 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
 .t-quote b { display: block; margin-top: 0.3rem; color: var(--fg-mute); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; }
 
 /* rodapé */
-.foot { border-top: 1px solid var(--line); padding-block: 2.2rem calc(2.2rem + 0px); background: var(--bg); }
+.foot { border-top: 1px solid var(--line); padding-block: 2.2rem calc(2.2rem + 0px); background: color-mix(in srgb, var(--bg) 70%, transparent); }
 .foot-in { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem 3rem; flex-wrap: wrap; }
 .foot .brand svg { width: 2rem; height: 2rem; }
 .foot .brand span { font-size: 1.2rem; }
