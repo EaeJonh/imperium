@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08080a">
+<title>Imperium | Afiliados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+
+<header class="bar">
+  <span class="brand">IMPERIUM <small>Afiliados</small></span>
+  <div class="bar-user" id="user-box" hidden>
+    <span id="user-email"></span>
+    <button type="button" class="ghost" id="logout">Sair</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <section id="login-view" class="card login" hidden>
+    <h1>Entrar no painel</h1>
+    <form id="login-form">
+      <label>Email <input type="email" name="email" autocomplete="username" required></label>
+      <label>Senha <input type="password" name="password" autocomplete="current-password" required></label>
+      <button type="submit" class="primary">Entrar</button>
+      <p class="error" id="login-error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="app-view" hidden>
+    <form id="affiliate-form" class="card">
+      <h2 id="form-title">Novo afiliado</h2>
+      <input type="hidden" name="id">
+      <div class="grid">
+        <label>Nome <input name="name" required maxlength="120"></label>
+        <label>Código <input name="code" required maxlength="32" autocapitalize="characters" spellcheck="false" placeholder="EX: RUAN10"></label>
+        <label class="wide">Convite exclusivo do Discord <input name="invite" required maxlength="200" spellcheck="false" placeholder="https://discord.gg/..."></label>
+        <label class="check"><input type="checkbox" name="active" checked> Ativo</label>
+      </div>
+      <p class="hint">Código: 3 a 32 caracteres entre letras, números, hífen e sublinhado (salvo em maiúsculas). Convite: discord.gg/… ou discord.com/invite/….</p>
+      <div class="actions">
+        <button type="submit" class="primary" id="save">Criar afiliado</button>
+        <button type="button" class="ghost" id="cancel-edit" hidden>Cancelar edição</button>
+      </div>
+      <p class="error" id="form-error" role="alert" hidden></p>
+    </form>
+
+    <div class="row">
+      <h2>Afiliados</h2>
+      <label class="inline">Período
+        <select id="period">
+          <option value="all">Todo o período</option>
+          <option value="30">Últimos 30 dias</option>
+          <option value="7">Últimos 7 dias</option>
+        </select>
+      </label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>Código</th><th>Convite</th><th>Status</th>
+          <th class="num">Visitas</th><th class="num">Visitantes</th><th class="num">Cliques</th><th>Ações</th>
+        </tr></thead>
+        <tbody id="affiliates-body"></tbody>
+      </table>
+    </div>
+    <p class="hint">Visitas: chegadas com o link do afiliado (uma a cada 30 min por visitante). Cliques: botões “Entrar no Discord” e “Copiar convite” enquanto a atribuição vale (30 dias).</p>
+  </section>
+</main>
+
+<script type="module" src="/admin/admin.js"></script>
+</body>
+</html>

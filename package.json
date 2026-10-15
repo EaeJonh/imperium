@@ -1,0 +1,9 @@
+{
+  "name": "imperium",
+  "private": true,
+  "type": "module",
+  "description": "Landing da Imperium e painel de afiliados",
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}

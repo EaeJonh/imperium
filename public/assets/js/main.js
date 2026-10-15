@@ -51,7 +51,7 @@
   // copiar convite
   var copy = $('#copy'), txt = $('#invite-text'), LABEL = 'Copiar convite';
   copy.addEventListener('click', function () {
-    var value = 'https://discord.gg/B7EYXPQndC';
+    var value = copy.getAttribute('data-invite') || 'https://discord.gg/B7EYXPQndC'; // data-invite: convite do afiliado (ref.js)
     var reset = function () { setTimeout(function () { copy.textContent = LABEL; }, 2200); };
     var done = function () { copy.textContent = 'Convite copiado'; reset(); };
     var fallback = function () {
