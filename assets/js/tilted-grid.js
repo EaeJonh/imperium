@@ -10,7 +10,8 @@
 // arco. Só o atraso da animação muda de um tile para outro.
 //
 // Uso: <div class="tg" data-tilted-grid data-images="/a.webp,/b.webp" hidden></div>
-// Opções em data-*: speed, tile-height, aspect, gap, axis, curve, fade.
+// Opções em data-*: speed, tile-height, aspect, gap, axis, curve, fade e, abaixo
+// de NARROW px, curve-narrow e tile-height-narrow.
 (function () {
   'use strict';
 
@@ -21,6 +22,17 @@
   var CAMERA = 1.6;
   // Um tile nunca passa desta % da largura, para o celular ainda mostrar vizinhos.
   var MAX_WIDTH = 55;
+  // Abaixo desta largura (px) a faixa usa um tile maior e uma curva mais aberta
+  // (data-curve-narrow): com o raio pequeno do celular, a curva normal enrolava
+  // o tile do centro e deixava os vizinhos quase de lado.
+  var NARROW = 640;
+  var NARROW_MAX_WIDTH = 78;
+  // Faixas ímpares ficam EDGE px mais largas para cobrir a emenda com a vizinha
+  // e DEPTH px mais longe do eixo, atrás das pares. Assim nenhuma face cruza a
+  // outra: com faces que se cruzam o navegador recorta os planos para ordená-los
+  // e às vezes deixa uma linha escura na emenda.
+  var EDGE = 1;
+  var DEPTH = 0.5;
 
   // Sem container queries ou ResizeObserver não há como medir: a faixa fica oculta.
   if (!window.ResizeObserver || !window.CSS || !CSS.supports('width', '1cqw')) return;
@@ -42,15 +54,26 @@
   // inteiro da tela e `sweep` onde ficam as pontas do loop (sempre além de
   // `limit`, para um tile só reaparecer do outro lado fora de vista).
   function measure(width, height, o) {
-    var h = Math.min((o.tileHeight / 100) * height, ((MAX_WIDTH / 100) * width) / o.aspect);
-    var radius = width * arc(o.bend);
+    var narrow = width < NARROW;
+    var maxWidth = narrow ? NARROW_MAX_WIDTH : MAX_WIDTH;
+    var bend = narrow ? o.bendNarrow : o.bend;
+    var tileHeight = narrow ? o.tileHeightNarrow : o.tileHeight;
+    var h = Math.min((tileHeight / 100) * height, ((maxWidth / 100) * width) / o.aspect);
+    var radius = width * arc(bend);
     if (!(h > 0) || !(radius > 0)) return null;
     var unit = deg(h / radius);
     var pitch = (o.aspect + o.gap / 100) * unit;
-    var limit = deg(o.bend) + (o.aspect * unit) / 2;
+    var limit = deg(bend) + (o.aspect * unit) / 2;
     var columns = Math.min(60, Math.max(2, Math.ceil((2 * limit) / pitch)));
     var sweep = round((columns * pitch) / 2);
-    return { columns: columns, sweep: sweep, unit: round(unit), limit: round(Math.min(sweep, limit)) };
+    return {
+      narrow: narrow, maxWidth: maxWidth, bend: bend, tileHeight: tileHeight,
+      columns: columns, sweep: sweep, unit: round(unit), limit: round(Math.min(sweep, limit))
+    };
+  }
+
+  function bendOf(degrees) {
+    return (Math.min(85, Math.max(5, degrees)) * Math.PI) / 180;
   }
 
   function num(el, name, fallback) {
@@ -70,19 +93,23 @@
       axis: num(root, 'axis', 56),
       fade: num(root, 'fade', 12)
     };
-    o.bend = (Math.min(85, Math.max(5, num(root, 'curve', 80))) * Math.PI) / 180;
+    o.bend = bendOf(num(root, 'curve', 80));
+    o.bendNarrow = bendOf(num(root, 'curve-narrow', 40));
+    o.tileHeightNarrow = num(root, 'tile-height-narrow', 62);
 
     var id = ++instances;
     var orbit = 'tg-o-' + id;
     var tileClass = 'tg-t-' + id;
-    var r = 100 * arc(o.bend);
-    var radius = +r.toFixed(3) + 'cqw';
     var share = o.aspect / SLICES;
+    // Raio, altura e largura máxima do tile mudam quando a faixa passa de NARROW; build() os define.
+    var radius = '0cqw';
+    var maxWidth = MAX_WIDTH;
+    var tileHeight = o.tileHeight;
 
     // Todo comprimento é múltiplo da altura do tile, que acompanha a altura da
-    // faixa até MAX_WIDTH limitar em telas estreitas.
+    // faixa até maxWidth limitar em telas estreitas.
     function u(n) {
-      return 'calc(' + round(n) + ' * min(' + o.tileHeight + 'cqh, ' + round(MAX_WIDTH / o.aspect) + 'cqw))';
+      return 'calc(' + round(n) + ' * min(' + tileHeight + 'cqh, ' + round(maxWidth / o.aspect) + 'cqw))';
     }
     // Vai até o eixo, gira, volta: a caixa fica no cilindro no ângulo dado.
     function turn(d) {
@@ -95,7 +122,6 @@
     band.className = 'tg-band';
     band.setAttribute('aria-hidden', 'true');
     var mask = 'linear-gradient(90deg,transparent,#000 ' + o.fade + '%,#000 ' + (100 - o.fade) + '%,transparent)';
-    band.style.perspective = +(r * CAMERA).toFixed(3) + 'cqw';
     band.style.perspectiveOrigin = '50% ' + o.axis + '%';
     band.style.maskImage = mask;
     band.style.webkitMaskImage = mask;
@@ -110,6 +136,11 @@
     function build(next) {
       layout = next;
       var columns = next.columns, sweep = next.sweep, unit = next.unit, limit = next.limit;
+      var r = 100 * arc(next.bend);
+      radius = +r.toFixed(3) + 'cqw';
+      maxWidth = next.maxWidth;
+      tileHeight = next.tileHeight;
+      band.style.perspective = +(r * CAMERA).toFixed(3) + 'cqw';
       var duration = columns * o.speed;
       // Além de `limit` o tile está fora da tela; é aí que ele dá a volta.
       var hide = round(((sweep - limit) / (2 * sweep || 1)) * 100);
@@ -142,17 +173,23 @@
       for (var k = 0; k < SLICES; k++) {
         var slice = document.createElement('div');
         slice.className = 'tg-slice' + (k === 0 ? ' tg-first' : '') + (k === SLICES - 1 ? ' tg-last' : '');
-        slice.style.left = u((o.aspect - share) / 2);
-        // 1px mais larga que a sua parte, para não abrir fresta entre faces vizinhas.
-        slice.style.width = k === SLICES - 1 ? u(share) : 'calc(' + u(share) + ' + 1px)';
+        // Ímpar: EDGE a mais de cada lado (só do lado de dentro na última, que é
+        // a borda do tile) e DEPTH para trás, sem cruzar as pares vizinhas.
+        var odd = k % 2 === 1;
+        var last = k === SLICES - 1;
+        var pad = odd ? EDGE : 0;
+        slice.style.left = 'calc(' + u((o.aspect - share) / 2) + ' - ' + pad + 'px)';
+        slice.style.width = 'calc(' + u(share) + ' + ' + (last ? pad : 2 * pad) + 'px)';
         slice.style.height = u(1);
-        slice.style.transform = turn((o.aspect / 2 - (k + 0.5) * share) * unit);
+        // O giro é em torno do centro da parte da imagem, não da caixa alargada.
+        if (odd && last) slice.style.transformOrigin = 'calc(50% + ' + pad / 2 + 'px) 50%';
+        slice.style.transform = turn((o.aspect / 2 - (k + 0.5) * share) * unit) + (odd ? ' translateZ(-' + DEPTH + 'px)' : '');
         var img = document.createElement('img');
         img.alt = '';
         img.draggable = false;
         img.decoding = 'async';
         img.src = images[first % images.length];
-        img.style.left = u(-k * share);
+        img.style.left = 'calc(' + u(-k * share) + ' + ' + pad + 'px)';
         img.style.width = u(o.aspect);
         img.style.height = u(1);
         slice.appendChild(img);
@@ -173,7 +210,7 @@
       var rect = entries[0].contentRect;
       var next = measure(rect.width, rect.height, o);
       if (!next) return;
-      if (layout && layout.columns === next.columns && layout.sweep === next.sweep && layout.unit === next.unit) return;
+      if (layout && layout.narrow === next.narrow && layout.columns === next.columns && layout.sweep === next.sweep && layout.unit === next.unit) return;
       build(next);
     }).observe(root);
 
