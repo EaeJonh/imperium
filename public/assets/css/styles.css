@@ -265,30 +265,61 @@ body::before {
 .dom-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
 .dom-grid .sec-head { position: sticky; top: 7rem; }
 .ledger { border-top: 1px solid var(--line-2); }
+/* Luz que segue o ponteiro pela lista (port em CSS do GlowCard). O main.js grava
+   em cada item a posição do ponteiro relativa a ele (--x/--y) e ao título
+   (--nx/--ny); sem essas variáveis a luz fica fora da caixa e sobra só o hover
+   comum. O título é pintado com background-clip: text, então a letra pega a luz. */
+@property --dom-ink { syntax: "<color>"; inherits: true; initial-value: #ece6d8; }
+@property --dom-glow { syntax: "<color>"; inherits: true; initial-value: #ece6d8; }
 .dom {
-  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.4rem 1.5rem;
+  --dom-ink: var(--fg);
+  --dom-glow: var(--fg);
+  --spot: 260px;
+  position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.4rem 1.5rem;
   padding: clamp(1.5rem, 2.6vw, 2.2rem) 0; text-decoration: none; color: var(--fg);
   border-bottom: 1px solid var(--line-2);
-  transition: padding .35s ease, background .35s ease;
+  transition: padding .45s cubic-bezier(.2, .7, .2, 1), --dom-ink .45s ease, --dom-glow .45s ease;
 }
+/* mancha de luz sob o ponteiro, mais o véu dourado que já existia */
 .dom::before {
-  content: ""; position: absolute; left: 0; top: -1px; height: 1px; width: 0; background: linear-gradient(90deg, var(--gold-hi), transparent);
-  transition: width .5s ease;
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(var(--spot) circle at calc(var(--x, -999) * 1px) calc(var(--y, -999) * 1px), color-mix(in srgb, var(--gold) 22%, transparent), transparent 70%),
+    linear-gradient(90deg, color-mix(in srgb, var(--gold) 8%, transparent), transparent 70%);
+  opacity: 0; transition: opacity .45s ease;
 }
-.dom:hover, .dom:focus-visible { background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 9%, transparent), transparent 70%); }
+/* linhas de cima e de baixo acendem perto do ponteiro, também nos itens vizinhos */
+.dom::after {
+  content: ""; position: absolute; inset: -1px 0; pointer-events: none;
+  background: radial-gradient(calc(var(--spot) * 0.8) circle at calc(var(--x, -999) * 1px) calc((var(--y, -999) + 1) * 1px), var(--gold-hi), color-mix(in srgb, var(--gold) 35%, transparent) 40%, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) top / 100% 1px no-repeat, linear-gradient(#000 0 0) bottom / 100% 1px no-repeat;
+  mask: linear-gradient(#000 0 0) top / 100% 1px no-repeat, linear-gradient(#000 0 0) bottom / 100% 1px no-repeat;
+  opacity: 0; transition: opacity .45s ease;
+}
+.dom:is(:hover, :focus-visible) { --dom-ink: var(--gold); --dom-glow: color-mix(in srgb, var(--gold-hi) 55%, #fff); }
+.dom:is(:hover, :focus-visible)::before, .is-lit .dom::after, .dom:focus-visible::after { opacity: 1; }
 @media (hover: hover) { .dom:hover { padding-left: 1.4rem; } }
-.dom:hover::before, .dom:focus-visible::before { width: 100%; }
-.dom-name { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: clamp(2rem, 4vw, 3rem); line-height: 1; letter-spacing: 0.01em; transition: color .3s; }
-.dom:hover .dom-name { color: var(--gold-hi); }
-.dom-desc { grid-column: 1; color: var(--fg-dim); max-width: 34rem; text-wrap: balance; }
+.dom-name {
+  font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: clamp(2rem, 4vw, 3rem); line-height: 1; letter-spacing: 0.01em;
+  background: radial-gradient(220px circle at calc(var(--nx, -999) * 1px) calc(var(--ny, -999) * 1px), var(--dom-glow), var(--dom-ink) 75%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: letter-spacing .5s cubic-bezier(.2, .7, .2, 1);
+}
+.dom:is(:hover, :focus-visible) .dom-name { letter-spacing: 0.035em; }
+.dom-desc { grid-column: 1; color: var(--fg-dim); max-width: 34rem; text-wrap: balance; transition: color .45s ease .05s; }
+.dom:is(:hover, :focus-visible) .dom-desc { color: var(--fg); }
 .dom-go {
   grid-row: 1 / span 2; grid-column: 2;
   display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%;
   border: 1px solid var(--line-2); color: var(--gold);
-  transition: background .3s, color .3s, transform .3s, border-color .3s;
+  transition: background .3s, color .3s, transform .45s cubic-bezier(.2, .7, .2, 1), border-color .3s, box-shadow .45s;
 }
 .dom-go svg { width: 1.1rem; height: 1.1rem; }
-.dom:hover .dom-go { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+.dom:is(:hover, :focus-visible) .dom-go {
+  background: var(--gold); color: var(--gold-ink); border-color: var(--gold);
+  transform: scale(1.08) rotate(-8deg);
+  box-shadow: 0 0 26px -2px color-mix(in srgb, var(--gold) 55%, transparent);
+}
 
 /* provas */
 .proof { background: color-mix(in srgb, var(--bg-2) 72%, transparent); border-block: 1px solid var(--line); overflow: hidden; }
@@ -413,6 +444,8 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
   .seal-text { animation: none; }
   .rv { opacity: 1; transform: none; transition: none; }
   .seal { transition: none; }
+  .dom, .dom::before, .dom::after, .dom-name, .dom-desc, .dom-go { transition: none; }
+  .dom:is(:hover, :focus-visible) .dom-go { transform: none; }
   .btn, .btn::before, .btn::after, .btn-label::before { animation: none; }
   .btn { transition: none; }
   .btn:is(:hover, :focus-visible) .btn-label::before { opacity: 0; }
