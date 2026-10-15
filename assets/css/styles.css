@@ -214,6 +214,16 @@ body::before {
 .proof .sec-head { display: flex; justify-content: space-between; align-items: end; gap: 1.2rem 3rem; flex-wrap: wrap; }
 .proof .sec-head > div { min-width: 0; }
 .proof .sec-head > p { margin: 0; max-width: 24rem; padding-bottom: 0.5rem; color: var(--fg-dim); text-wrap: balance; }
+/* faixa curva de prints (assets/js/tilted-grid.js), de ponta a ponta da tela */
+.tg { position: relative; width: 100vw; margin: clamp(2rem, 4vw, 3rem) 0 0 calc(50% - 50vw); height: clamp(240px, 34vw, 440px); container-type: size; overflow: hidden; }
+.tg-band { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s ease; }
+.tg-band.is-ready { opacity: 1; }
+.tg-tile { position: absolute; transform-style: preserve-3d; }
+.tg-paused .tg-tile { animation-play-state: paused; }
+.tg-slice { position: absolute; top: 0; overflow: hidden; background: var(--graphite); }
+.tg-first { border-radius: 4px 0 0 4px; }
+.tg-last { border-radius: 0 4px 4px 0; }
+.tg-slice img { position: absolute; top: 0; max-width: none; object-fit: cover; }
 .shots { margin-top: clamp(2.2rem, 5vw, 3.5rem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(0.9rem, 2vw, 1.5rem); position: relative; }
 .shot { display: block; padding: 0; border: 1px solid var(--line-2); background: #000; cursor: zoom-in; border-radius: 4px; overflow: hidden; position: relative; transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease; }
 .shot:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 24px 50px -24px rgba(201, 169, 106, 0.45); }
