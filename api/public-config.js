@@ -1,5 +1,5 @@
-// GET /api/public-config — URL e chave pública (anon) do Supabase para o painel /admin.
-// A chave anon é pública por natureza; o acesso aos dados é controlado pela RLS.
+// GET /api/public-config — URL e chave publicável do Supabase para o painel /admin.
+// A chave publicável é pública por natureza; o acesso aos dados é controlado pela RLS.
 
 export default function handler(req, res) {
   if (req.method !== 'GET') {
@@ -9,10 +9,10 @@ export default function handler(req, res) {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabasePublishableKey) {
     res.setHeader('Cache-Control', 'no-store');
     res.statusCode = 503;
     return res.end(JSON.stringify({ error: 'Supabase não configurado' }));
@@ -20,5 +20,5 @@ export default function handler(req, res) {
 
   res.setHeader('Cache-Control', 'public, max-age=300');
   res.statusCode = 200;
-  return res.end(JSON.stringify({ supabaseUrl, supabaseAnonKey }));
+  return res.end(JSON.stringify({ supabaseUrl, supabasePublishableKey }));
 }

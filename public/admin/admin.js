@@ -245,7 +245,7 @@ async function start() {
     return;
   }
 
-  supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+  supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });
 

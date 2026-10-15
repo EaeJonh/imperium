@@ -54,11 +54,20 @@ Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "inv
    select id from auth.users where email = 'SEU-EMAIL';
    ```
 6. Em **Authentication → URL Configuration**, use `https://imperiumblox.shop` como Site URL.
+7. Em **Project Settings → API Keys**, copie a chave publicável (`sb_publishable_...`) e crie/copie uma chave secreta (`sb_secret_...`).
 
 ### Vercel
 
 1. Importe o repositório com o preset **Other**, sem comando de build. O `vercel.json` já define `public` como diretório de saída.
-2. Cadastre as variáveis de `.env.example` em **Settings → Environment Variables**.
+2. Cadastre as variáveis de `.env.example` em **Settings → Environment Variables**:
+
+   | Variável | Uso |
+   |---|---|
+   | `SUPABASE_URL` | URL do projeto |
+   | `SUPABASE_PUBLISHABLE_KEY` | chave publicável; o painel recebe pelo `/api/public-config` e a RLS protege os dados |
+   | `SUPABASE_SECRET_KEY` | chave secreta; usada só pelo `/api/ref`, nunca exposta ao navegador |
+   | `ALLOWED_ORIGINS` | origens aceitas pelo `/api/ref`, separadas por vírgula |
+
 3. Se usar um domínio próprio no Supabase (fora de `*.supabase.co`), inclua-o no `connect-src` do `Content-Security-Policy` do `/admin` no `vercel.json`.
 
 ## Testes
