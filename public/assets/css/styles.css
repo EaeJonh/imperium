@@ -8,6 +8,7 @@
   --card: #1D1D1B;
   --muted: #252523;
   --fg: #ece6d8; /* texto */
+  --discord: #5865F2; /* cor da marca do Discord, só no selo dos botões */
 
   /* papéis usados nos componentes */
   --bg: var(--background);
@@ -84,30 +85,95 @@ body::before {
   padding-right: 0.08em;
 }
 
-/* ---------- botão ---------- */
+/* ---------- botão do Discord ----------
+   Port em CSS puro do ShinyButton: um brilho dourado corre pela borda, com
+   pontilhado e reflexo por dentro; no hover o arco abre e acelera. Os valores
+   animados são propriedades registradas (@property). Sem suporte, a borda fica
+   parada e o botão continua inteiro. */
+@property --btn-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@property --btn-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@property --btn-arc { syntax: "<percentage>"; initial-value: 5%; inherits: false; }
+@property --btn-shine { syntax: "<color>"; initial-value: white; inherits: false; }
+
 .btn {
+  --btn-fill: var(--card);
+  --btn-rest: color-mix(in srgb, var(--gold) 30%, transparent);
+  --btn-shine: color-mix(in srgb, var(--gold-hi) 45%, #fff);
+  --btn-sweep: 3s;
+  --btn-ease: .8s cubic-bezier(.25, 1, .5, 1);
+  --btn-anim: btn-angle linear infinite;
+  --ico: 1.9rem;
   position: relative; isolation: isolate; overflow: hidden;
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem;
   padding: 1.05rem 1.7rem;
   font: 800 0.86rem/1 var(--f-body); letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
-  color: var(--gold-ink);
-  background: linear-gradient(180deg, var(--gold-hi), var(--gold) 60%, color-mix(in srgb, var(--gold) 82%, #000));
-  border-radius: 2px;
-  outline: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); outline-offset: 4px;
-  box-shadow: 0 10px 40px -10px color-mix(in srgb, var(--gold) 55%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  transition: transform .25s ease, box-shadow .25s ease, outline-offset .25s ease;
+  color: var(--fg);
+  border: 1px solid transparent; border-radius: 4px;
+  background:
+    linear-gradient(var(--btn-fill), var(--btn-fill)) padding-box,
+    conic-gradient(
+      from calc(var(--btn-angle) - var(--btn-offset)),
+      var(--btn-rest),
+      var(--gold) var(--btn-arc),
+      var(--btn-shine) calc(var(--btn-arc) * 2),
+      var(--gold) calc(var(--btn-arc) * 3),
+      var(--btn-rest) calc(var(--btn-arc) * 4)
+    ) border-box;
+  box-shadow: inset 0 0 0 1px var(--secondary), 0 12px 40px -16px color-mix(in srgb, var(--gold) 55%, transparent);
+  transition: var(--btn-ease);
+  transition-property: --btn-offset, --btn-arc, --btn-shine;
 }
+.btn::before, .btn::after, .btn-label::before {
+  content: ""; pointer-events: none;
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: -1;
+}
+/* pontilhado que acompanha o brilho */
 .btn::before {
-  content: ""; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
-  transform: translateX(-120%); transition: transform .7s ease;
+  width: calc(100% - 6px); height: calc(100% - 6px);
+  background: radial-gradient(circle at 2px 2px, var(--gold-hi) 0.5px, transparent 0) padding-box;
+  background-size: 4px 4px; background-repeat: space;
+  -webkit-mask-image: conic-gradient(from calc(var(--btn-angle) + 45deg), #000, transparent 10% 90%, #000);
+  mask-image: conic-gradient(from calc(var(--btn-angle) + 45deg), #000, transparent 10% 90%, #000);
+  border-radius: inherit; opacity: 0.4;
 }
-.btn:hover { transform: translateY(-2px); outline-offset: 6px; box-shadow: 0 16px 50px -10px color-mix(in srgb, var(--gold-hi) 70%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
-.btn:hover::before { transform: translateX(120%); }
-.btn:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 5px; }
-.btn svg { width: 1.3rem; height: 1.3rem; flex: none; }
-.btn--sm { padding: 0.75rem 1.1rem; font-size: 0.74rem; outline-offset: 3px; white-space: nowrap; }
-.btn--lg { padding: 1.3rem 2.2rem; font-size: 0.95rem; }
+/* reflexo girando por dentro */
+.btn::after {
+  --btn-anim: btn-spin linear infinite;
+  width: 100%; aspect-ratio: 1;
+  background: linear-gradient(-50deg, transparent, var(--gold), transparent);
+  -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
+  mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
+  opacity: 0.6;
+}
+/* brilho que respira por baixo do texto no hover */
+.btn-label::before {
+  width: calc(100% + 1rem); height: calc(100% + 1rem);
+  box-shadow: inset 0 -1ex 2rem 4px var(--gold);
+  opacity: 0; transition: opacity var(--btn-ease);
+  animation: calc(var(--btn-sweep) * 1.5) btn-breathe linear infinite;
+}
+.btn, .btn::before, .btn::after {
+  animation: var(--btn-anim) var(--btn-sweep), var(--btn-anim) calc(var(--btn-sweep) / 0.4) reverse paused;
+  animation-composition: add;
+}
+.btn:is(:hover, :focus-visible) { --btn-arc: 20%; --btn-offset: 95deg; --btn-shine: var(--gold-hi); }
+.btn:is(:hover, :focus-visible), .btn:is(:hover, :focus-visible)::before, .btn:is(:hover, :focus-visible)::after { animation-play-state: running; }
+.btn:is(:hover, :focus-visible) .btn-label::before { opacity: 1; }
+.btn:active { translate: 0 1px; }
+.btn:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 4px; }
+/* selo do Discord: a cor da marca deixa claro, de longe, para onde o botão leva */
+.btn-ico {
+  display: inline-grid; place-items: center; flex: none;
+  width: var(--ico); height: var(--ico); margin-block: calc(var(--ico) * -0.25);
+  border-radius: 50%; background: var(--discord); color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #fff 18%, transparent) inset;
+}
+.btn-ico svg { width: 62%; height: 62%; }
+.btn--sm { --ico: 1.6rem; padding: 0.75rem 1.1rem; font-size: 0.74rem; white-space: nowrap; }
+.btn--lg { --ico: 2.2rem; padding: 1.3rem 2.2rem; font-size: 0.95rem; }
+@keyframes btn-angle { to { --btn-angle: 360deg; } }
+@keyframes btn-spin { to { rotate: 360deg; } }
+@keyframes btn-breathe { from, to { scale: 1; } 50% { scale: 1.2; } }
 
 .link {
   display: inline-flex; align-items: center; gap: 0.5rem;
@@ -281,7 +347,7 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
 
 /* barra fixa mobile */
 .dock { display: none; }
-.dock .btn:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+.dock .btn:focus-visible { outline-offset: 3px; }
 
 /* reveal: sempre legível, só desliza */
 .rv { opacity: 0.35; transform: translateY(22px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
@@ -299,8 +365,7 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
   .nav a:not(.btn) { display: none; }
   .top-in { height: 4rem; }
   .brand span { font-size: 1.3rem; }
-  .btn--sm { padding: 0.65rem 0.8rem; font-size: 0.66rem; letter-spacing: 0.1em; gap: 0.5rem; min-height: 44px; }
-  .btn--sm svg { width: 1.1rem; height: 1.1rem; }
+  .btn--sm { --ico: 1.45rem; padding: 0.65rem 0.8rem; font-size: 0.66rem; letter-spacing: 0.1em; gap: 0.5rem; min-height: 44px; }
   .hero-cta .btn, .final-cta .btn { width: 100%; }
   .shots { grid-template-columns: 1fr; }
   .shot-cta { display: none; }
@@ -330,16 +395,18 @@ dialog.lb button:hover { border-color: var(--gold); color: var(--gold-hi); }
   .brand { gap: 0.5rem; }
   .brand svg { width: 2rem; height: 2rem; }
   .brand span { font-size: 1.1rem; letter-spacing: 0.12em; }
-  .btn--sm { padding: 0.6rem 0.75rem; letter-spacing: 0.05em; gap: 0.4rem; }
-  .btn--sm svg { width: 1rem; height: 1rem; }
+  .btn--sm { --ico: 1.3rem; padding: 0.6rem 0.75rem; letter-spacing: 0.05em; gap: 0.4rem; }
 }
 @media (max-width: 360px) {
   .btn--lg { padding: 1.2rem 1rem; letter-spacing: 0.1em; font-size: 0.88rem; }
-  .top .btn--sm svg { display: none; }
+  .top .btn--sm .btn-ico { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .seal-text { animation: none; }
   .rv { opacity: 1; transform: none; transition: none; }
   .seal { transition: none; }
+  .btn, .btn::before, .btn::after, .btn-label::before { animation: none; }
+  .btn { transition: none; }
+  .btn:is(:hover, :focus-visible) .btn-label::before { opacity: 0; }
 }
