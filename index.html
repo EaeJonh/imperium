@@ -132,21 +132,23 @@
       <div class="rv">
         <h2 class="display">Direto do servidor.</h2>
       </div>
-      <p class="rv">Feedbacks reais de membros, em prints do Discord. Toque para ampliar.</p>
+      <p class="rv">Feedbacks reais de membros, em prints do Discord. Toque em um print para ampliar.</p>
     </div>
 
     <div class="tg" data-tilted-grid data-images="/prova-1.webp,/prova-2.webp,/prova-3.webp,/prova-4.webp,/prova-5.webp" data-aspect="1.9" data-tile-height="46" data-axis="50" hidden></div>
 
-    <div class="shots">
-      <button class="shot rv" type="button" aria-haspopup="dialog" data-full="/prova-1.webp" data-alt="Mensagem de Suki no Discord: Os melhores como sempre né tropa 10000/10"><img src="/prova-1.webp" width="670" height="340" loading="lazy" decoding="async" alt="Ampliar: Mensagem de Suki no Discord: Os melhores como sempre né tropa 10000/10"></button>
-      <button class="shot rv" type="button" style="--d:.08s" aria-haspopup="dialog" data-full="/prova-2.webp" data-alt="Mensagem de Nicolas Yuri no Discord: A melhor loja de todas 10000/10"><img src="/prova-2.webp" width="679" height="378" loading="lazy" decoding="async" alt="Ampliar: Mensagem de Nicolas Yuri no Discord: A melhor loja de todas 10000/10"></button>
-      <button class="shot rv" type="button" aria-haspopup="dialog" data-full="/prova-3.webp" data-alt="Mensagem de um membro no Discord: salvando novamente 10/10"><img src="/prova-3.webp" width="680" height="357" loading="lazy" decoding="async" alt="Ampliar: Mensagem de um membro no Discord: salvando novamente 10/10"></button>
-      <button class="shot rv" type="button" style="--d:.08s" aria-haspopup="dialog" data-full="/prova-4.webp" data-alt="Mensagem de ruan.zix no Discord: a loja mais confiável 1000/10"><img src="/prova-4.webp" width="701" height="373" loading="lazy" decoding="async" alt="Ampliar: Mensagem de ruan.zix no Discord: a loja mais confiável 1000/10"></button>
-      <button class="shot rv" type="button" aria-haspopup="dialog" data-full="/prova-5.webp" data-alt="Mensagem de Scott no Discord: Loja mt confiável 1000/10"><img src="/prova-5.webp" width="667" height="366" loading="lazy" decoding="async" alt="Ampliar: Mensagem de Scott no Discord: Loja mt confiável 1000/10"></button>
-      <div class="shot-cta rv" style="--d:.08s">
-        <p>Entre e veja por si mesmo.</p>
-        <a class="btn" href="https://discord.gg/B7EYXPQndC" target="_blank" rel="noopener"><span class="btn-ico" aria-hidden="true"><svg><use href="#discord"/></svg></span><span class="btn-label">Entrar no Discord</span><span class="sr-only"> (abre em nova aba)</span></a>
-      </div>
+    <!-- avaliações em texto: lidas por leitores de tela; aparecem na tela só com foco do teclado ou se a faixa não carregar -->
+    <ul class="proof-list" aria-label="Feedbacks dos membros (abrem o print ampliado)">
+      <li><button class="proof-open" type="button" aria-haspopup="dialog" data-full="/prova-1.webp" data-alt="Mensagem de Suki no Discord: Os melhores como sempre né tropa 10000/10">Mensagem de Suki no Discord: Os melhores como sempre né tropa 10000/10</button></li>
+      <li><button class="proof-open" type="button" aria-haspopup="dialog" data-full="/prova-2.webp" data-alt="Mensagem de Nicolas Yuri no Discord: A melhor loja de todas 10000/10">Mensagem de Nicolas Yuri no Discord: A melhor loja de todas 10000/10</button></li>
+      <li><button class="proof-open" type="button" aria-haspopup="dialog" data-full="/prova-3.webp" data-alt="Mensagem de um membro no Discord: salvando novamente 10/10">Mensagem de um membro no Discord: salvando novamente 10/10</button></li>
+      <li><button class="proof-open" type="button" aria-haspopup="dialog" data-full="/prova-4.webp" data-alt="Mensagem de ruan.zix no Discord: a loja mais confiável 1000/10">Mensagem de ruan.zix no Discord: a loja mais confiável 1000/10</button></li>
+      <li><button class="proof-open" type="button" aria-haspopup="dialog" data-full="/prova-5.webp" data-alt="Mensagem de Scott no Discord: Loja mt confiável 1000/10">Mensagem de Scott no Discord: Loja mt confiável 1000/10</button></li>
+    </ul>
+
+    <div class="proof-cta rv">
+      <a class="btn" id="proof-cta" href="https://discord.gg/B7EYXPQndC" target="_blank" rel="noopener"><span class="btn-ico" aria-hidden="true"><svg><use href="#discord"/></svg></span><span class="btn-label">Entrar no Discord</span><span class="sr-only"> (abre em nova aba)</span></a>
+      <p>Grátis e sem compromisso.</p>
     </div>
   </div>
 </section>
