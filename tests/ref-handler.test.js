@@ -6,10 +6,10 @@ import { createRefHandler, parseRequest } from '../api/_lib/ref-core.js';
 const ORIGIN = 'https://imperiumblox.shop';
 const VISITOR = '4f9c2b8e-1d3a-4c5e-9f7a-2b6d8e0c1a3f';
 
-function request({ method = 'POST', origin = ORIGIN, body } = {}) {
+function request({ method = 'POST', origin = ORIGIN, body, headers = {} } = {}) {
   const req = Readable.from(body === undefined ? [] : [Buffer.from(body)]);
   req.method = method;
-  req.headers = origin ? { origin } : {};
+  req.headers = { ...(origin ? { origin } : {}), ...headers };
   return req;
 }
 
@@ -54,6 +54,32 @@ test('recusa origem não permitida ou ausente', async () => {
   assert.equal((await run(handler, { origin: 'https://evil.example', body: body({ code: 'RUAN10' }) })).statusCode, 403);
   assert.equal((await run(handler, { origin: null, body: body({ code: 'RUAN10' }) })).statusCode, 403);
   assert.equal(calls.length, 0);
+});
+
+test('sem ALLOWED_ORIGINS: aceita a página do próprio host (domínio ou Preview) e recusa os demais', async () => {
+  const calls = [];
+  const handler = createRefHandler({ allowedOrigins: undefined, lookup: async (r) => { calls.push(r); return 'https://discord.gg/abc'; }, log: () => {} });
+  const preview = 'imperiumsitedc-git-feature-affiliate-admin-imperium-bb60.vercel.app';
+  const ok = [
+    { origin: 'https://imperiumblox.shop', headers: { host: 'imperiumblox.shop' } },
+    { origin: `https://${preview}`, headers: { host: preview } },
+    { origin: `https://${preview}`, headers: { host: 'interno.vercel', 'x-forwarded-host': preview } },
+  ];
+  for (const o of ok) {
+    const res = await run(handler, { ...o, body: body({ code: 'RUAN10' }) });
+    assert.equal(res.statusCode, 200);
+  }
+  const blocked = [
+    { origin: 'https://evil.example', headers: { host: 'imperiumblox.shop' } },
+    { origin: 'https://imperiumblox.shop.evil.example', headers: { host: 'imperiumblox.shop' } },
+    { origin: 'null', headers: { host: 'imperiumblox.shop' } },
+    { origin: null, headers: { host: 'imperiumblox.shop' } },
+    { origin: 'https://imperiumblox.shop', headers: {} },
+  ];
+  for (const o of blocked) {
+    assert.equal((await run(handler, { ...o, body: body({ code: 'RUAN10' }) })).statusCode, 403);
+  }
+  assert.equal(calls.length, ok.length);
 });
 
 test('aceita a outra origem configurada, com ou sem barra final', async () => {

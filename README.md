@@ -38,7 +38,7 @@ Os eventos guardam apenas um `visitor_id` aleatório gerado no navegador. Não h
 
 Corpo (`text/plain` ou JSON): `{ "code": "RUAN10", "visitorId": "<uuid>", "event": "visit" | "click" | null }`
 
-Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "invite": null }` em qualquer outro caso (inexistente, inativo, malformado ou erro), sempre com status 200. Só aceita origens listadas em `ALLOWED_ORIGINS` (403) e o método POST (405). O banco limita cada visitante a 30 eventos por 10 minutos e conta uma visita por visitante e afiliado a cada 30 minutos.
+Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "invite": null }` em qualquer outro caso (inexistente, inativo, malformado ou erro), sempre com status 200. Aceita chamadas da página do próprio site em que está rodando (domínio principal ou Preview, sem configuração); outras origens só se listadas em `ALLOWED_ORIGINS` (senão 403) e o método POST (405). O banco limita cada visitante a 30 eventos por 10 minutos e conta uma visita por visitante e afiliado a cada 30 minutos.
 
 ## Configuração
 
@@ -71,8 +71,9 @@ Resposta: `{ "invite": "https://discord.gg/..." }` para afiliado ativo e `{ "inv
    | `SUPABASE_ANON_KEY` | chave publicável (`sb_publishable_...`); o painel recebe pelo `/api/public-config` e a RLS protege os dados |
    | `SUPABASE_SERVICE_ROLE_KEY` | chave secreta (`sb_secret_...`); usada só pelo `/api/ref`, nunca exposta ao navegador |
 
+   | `ALLOWED_ORIGINS` | opcional: outros domínios que podem chamar o `/api/ref`, separados por vírgula. O próprio domínio e os Previews já são aceitos automaticamente |
+
    Os nomes são os antigos do Supabase, mas os valores devem ser as chaves atuais. Chaves JWT legadas também funcionam.
-   | `ALLOWED_ORIGINS` | origens aceitas pelo `/api/ref`, separadas por vírgula |
 
 3. Se usar um domínio próprio no Supabase (fora de `*.supabase.co`), inclua-o no `connect-src` do `Content-Security-Policy` do `/admin` no `vercel.json`.
 

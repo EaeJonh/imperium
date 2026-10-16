@@ -50,9 +50,21 @@ async function readBody(req) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+// A página do próprio site (mesmo host que recebeu a requisição, seja o domínio
+// principal ou um Preview) sempre pode chamar; a lista extra serve para liberar
+// outros domínios, como o www quando ele não redireciona.
+export function isAllowedOrigin(origin, host, extra) {
+  if (!origin) return false;
+  let url;
+  try { url = new URL(origin); } catch { return false; }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+  if (host && url.host.toLowerCase() === String(host).toLowerCase()) return true;
+  return extra.has(url.origin);
+}
+
 // lookup({ code, visitorId, event }) devolve o convite do afiliado ativo ou null.
 export function createRefHandler({ lookup, allowedOrigins, log = console.error }) {
-  const origins = typeof allowedOrigins === 'string' ? parseOrigins(allowedOrigins) : allowedOrigins;
+  const origins = allowedOrigins instanceof Set ? allowedOrigins : parseOrigins(allowedOrigins);
 
   return async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -63,8 +75,8 @@ export function createRefHandler({ lookup, allowedOrigins, log = console.error }
       return res.end();
     }
 
-    const origin = String(req.headers.origin || '').replace(/\/+$/, '');
-    if (!origins.has(origin)) {
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (!isAllowedOrigin(req.headers.origin, host, origins)) {
       res.statusCode = 403;
       return res.end();
     }
